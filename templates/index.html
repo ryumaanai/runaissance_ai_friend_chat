@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AI Buddy Chat</title>
+    
+    <!-- Chapter 10でこのCSSファイルを編集してデザインを完成させます -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<div id="chat-container">
+    <div id="header">AI Buddy Chat</div>
+    
+    <div id="messages-area">
+        <!-- JavascriptでここにメッセージのHTMLが追加されていきます -->
+    </div>
+
+    <!-- AI入力中のインジケーター（CSSがない段階ではただのテキストとして表示されます） -->
+    <div class="typing-indicator" id="typing-indicator" style="display: none;">AIが入力中...</div>
+
+    <!-- メッセージ入力フォーム -->
+    <div id="input-area">
+        <input type="text" id="message-input" placeholder="メッセージを入力..." autocomplete="off" />
+        <button id="send-btn">送信</button>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const messagesArea = document.getElementById('messages-area');
+        const messageInput = document.getElementById('message-input');
+        const sendBtn = document.getElementById('send-btn');
+        const typingIndicator = document.getElementById('typing-indicator');
+
+        // 画面を最下部へスクロール
+        function scrollToBottom() {
+            messagesArea.scrollTop = messagesArea.scrollHeight;
+        }
+
+        // メッセージのDOM要素を作成して画面に追加
+        function createBubble(sender, text) {
+            // Chapter 10のCSS装飾用にクラス名はあらかじめ付与しておく
+            const row = document.createElement('div');
+            row.className = `message-row ${sender}`;
+            
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble';
+            bubble.textContent = text;
+            
+            row.appendChild(bubble);
+            messagesArea.appendChild(row);
+            scrollToBottom();
+        }
+
+        // メッセージ送信処理
+        async function sendMessage() {
+            const text = messageInput.value.trim();
+            if (!text) return;
+
+            // 1. ユーザーのメッセージを画面に追加
+            createBubble('user', text);
+            messageInput.value = '';
+            sendBtn.disabled = true;
+            typingIndicator.style.display = 'block'; // 「入力中...」を表示
+            scrollToBottom();
+
+            try {
+                // 2. バックエンド(Flask)のAPIへPOSTリクエスト
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: text })
+                });
+
+                if (!response.ok) throw new Error('Network response was not ok');
+
+                // 3. サーバーから一括で返答を受け取る（ストリーミングなし）
+                const data = await response.json();
+                
+                // 4. AIの返答を画面に追加
+                typingIndicator.style.display = 'none'; // 「入力中...」を非表示
+                createBubble('ai', data.reply);
+
+            } catch (error) {
+                console.error('Error:', error);
+                typingIndicator.style.display = 'none';
+                createBubble('ai', "エラーが発生しました。もう一度試してください。");
+            } finally {
+                sendBtn.disabled = false;
+                messageInput.focus();
+            }
+        }
+
+        // イベントリスナー（クリック＆Enterキーで送信）
+        sendBtn.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    });
+</script>
+
+</body>
+</html>

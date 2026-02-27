@@ -2,9 +2,53 @@
  * ==========================================
  * Chapter 10: 【CSS】チャットUIをデザインする
  * ==========================================
- * 現在はCSSが全く記述されていないため、
- * ブラウザ標準の簡素な見た目になっています。
+ * 現在は学習の初期段階のため、装飾（色や吹き出し）は行わず、
+ * 最低限の「情報の整理（レイアウト）」のみを行っています。
  *
- * このファイルにスタイルを追加して、
+ * Chapter 10でこのファイルにスタイルを追加して、
  * LINEのような見やすいチャット画面を完成させましょう！
  */
+
+/* 画面全体の余白リセットと基本設定 */
+body {
+    margin: 0;
+    padding: 20px;
+    font-family: sans-serif;
+}
+
+/* 1. センターに寄せる（視線の移動を減らし読みやすくする） */
+#chat-container {
+    max-width: 600px; /* 幅を制限して間延びを防ぐ */
+    margin: 0 auto;   /* 画面の中央に配置 */
+}
+
+/* 2. ユーザーとAIの回答の間を空ける（情報の区切りを明確にする） */
+#messages-area {
+    display: flex;
+    flex-direction: column;
+    gap: 32px; /* メッセージとメッセージの間に十分な余白を設ける */
+    margin-top: 20px;
+    margin-bottom: 40px;
+}
+
+/* 入力欄の最低限の整理（ボタンと入力欄を横並びにする） */
+#input-area {
+    display: flex;
+    gap: 10px;
+}
+
+#message-input {
+    flex: 1; /* 入力欄を可能な限り広げる */
+    padding: 8px;
+}
+
+#send-btn {
+    padding: 8px 16px;
+}
+
+.bubble p {
+    margin: 0;
+}
+.bubble p:not(:last-child) {
+    margin-bottom: 1em; /* 複数段落がある場合は間を空ける */
+}

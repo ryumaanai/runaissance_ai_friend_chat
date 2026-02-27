@@ -5,8 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>AI Buddy Chat</title>
     
+    <!-- MarkdownをHTMLに変換するためのライブラリ (marked.js) -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
     <!-- Chapter 10でこのCSSファイルを編集してデザインを完成させます -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 
@@ -29,6 +32,11 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", () => {
+        // Markdownの改行をそのままHTMLの改行(<br>)に変換する設定
+        marked.setOptions({
+            breaks: true
+        });
+
         const messagesArea = document.getElementById('messages-area');
         const messageInput = document.getElementById('message-input');
         const sendBtn = document.getElementById('send-btn');
@@ -47,7 +55,13 @@
             
             const bubble = document.createElement('div');
             bubble.className = 'bubble';
-            bubble.textContent = text;
+            
+            // ★変更点：AIの返信はMarkdownをHTMLに変換、ユーザーの送信はそのままテキストとして扱う
+            if (sender === 'ai') {
+                bubble.innerHTML = marked.parse(text);
+            } else {
+                bubble.textContent = text;
+            }
             
             row.appendChild(bubble);
             messagesArea.appendChild(row);
